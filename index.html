@@ -158,39 +158,7 @@
                                 </tr>
                             </thead>
                             <tbody id="lista-transacciones" class="divide-y divide-slate-100 text-sm">
-                                <!-- Filas de ejemplo estático -->
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="py-3.5 px-4 font-medium text-slate-800">Sueldo de Octubre</td>
-                                    <td class="py-3.5 px-4"><span
-                                            class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full border border-slate-200">Sueldo</span>
-                                    </td>
-                                    <td class="py-3.5 px-4"><span
-                                            class="text-xs px-2 py-0.5 rounded font-semibold bg-emerald-100 text-emerald-800">Ingreso</span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-semibold text-emerald-600">+$1,200.00</td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <button class="text-rose-500 hover:text-rose-700 transition px-2 py-1"
-                                            title="Eliminar">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-slate-50 transition">
-                                    <td class="py-3.5 px-4 font-medium text-slate-800">Compra de Supermercado</td>
-                                    <td class="py-3.5 px-4"><span
-                                            class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full border border-slate-200">Comida</span>
-                                    </td>
-                                    <td class="py-3.5 px-4"><span
-                                            class="text-xs px-2 py-0.5 rounded font-semibold bg-rose-100 text-rose-800">Gasto</span>
-                                    </td>
-                                    <td class="py-3.5 px-4 text-right font-semibold text-rose-600">-$150.50</td>
-                                    <td class="py-3.5 px-4 text-center">
-                                        <button class="text-rose-500 hover:text-rose-700 transition px-2 py-1"
-                                            title="Eliminar">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                                <!-- Las filas se inyectan desde index.js -->
                             </tbody>
                         </table>
                     </div>
@@ -202,14 +170,7 @@
                         <i class="fa-solid fa-chart-pie text-indigo-600"></i> Resumen por Categorías
                     </h2>
                     <div id="resumen-categorias" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                            <p class="text-xs font-semibold text-slate-500 uppercase">Sueldo</p>
-                            <p class="text-base font-bold text-slate-800 mt-1">$1,200.00</p>
-                        </div>
-                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                            <p class="text-xs font-semibold text-slate-500 uppercase">Comida</p>
-                            <p class="text-base font-bold text-slate-800 mt-1">$150.50</p>
-                        </div>
+                        <!-- Las tarjetas se inyectan desde index.js -->
                     </div>
                 </section>
 
