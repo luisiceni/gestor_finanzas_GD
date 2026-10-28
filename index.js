@@ -10,12 +10,41 @@ const elIngresos = document.getElementById("ingresos-totales");
 const elGastos = document.getElementById("gastos-totales");
 const elBalance = document.getElementById("balance-neto");
 
+
+// ---------------------------------------------------------------
+// LOCAL STORAGE
+// ---------------------------------------------------------------
+const CLAVE_STORAGE = "gestor_finanzas_historial";
+
+function guardarEnLocalStorage() {
+    localStorage.setItem(CLAVE_STORAGE, JSON.stringify(Transaccion.historial));
+}
+
+function cargarDesdeLocalStorage() {
+    const datosGuardados = localStorage.getItem(CLAVE_STORAGE);
+    if (!datosGuardados) return;
+
+    const transaccionesPlanas = JSON.parse(datosGuardados);
+    
+    // Limpiamos el array estático por seguridad antes de re-instanciar
+    Transaccion.historial = [];
+
+    for (let i = 0; i < transaccionesPlanas.length; i++) {
+        const t = transaccionesPlanas[i];
+        const nuevaTransaccion = new Transaccion(t.id, t.tipo, t.descripcion, t.monto, t.categoria);
+        agregarFilaAlHistorial(nuevaTransaccion);
+    }
+}
+
 // ---------------------------------------------------------------
 // Utilidades
 // ---------------------------------------------------------------
-const formatearMoneda = (valor) =>
-    valor.toLocaleString("en-US", { style: "currency", currency: "USD" });
-
+function formatearMoneda(valor) {
+    return valor.toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS"
+    });
+}
 // ---------------------------------------------------------------
 // CÁLCULOS (trabajan sobre el array estático Transaccion.historial)
 // ---------------------------------------------------------------
@@ -23,9 +52,13 @@ function calcularTotales() {
     let ingresos = 0;
     let gastos = 0;
 
-    for (const t of Transaccion.historial) {
-        if (t.tipo === "ingreso") ingresos += t.monto;
-        else gastos += t.monto;
+    for (let i = 0; i < Transaccion.historial.length; i++) {
+        const t = Transaccion.historial[i];
+        if (t.tipo === "ingreso") {
+            ingresos += t.monto;
+        } else {
+            gastos += t.monto;
+        }
     }
 
     return { ingresos, gastos, balance: ingresos - gastos };
@@ -35,10 +68,10 @@ function agruparPorCategoria() {
     // Devuelve { Comida: -150.5, Sueldo: 1200, ... } (ingresos suman, gastos restan)
     const grupos = {};
 
-    for (const t of Transaccion.historial) {
+    Transaccion.historial.forEach((t) => {
         const signo = t.tipo === "ingreso" ? 1 : -1;
         grupos[t.categoria] = (grupos[t.categoria] || 0) + signo * t.monto;
-    }
+    });
 
     return grupos;
 }
@@ -72,7 +105,7 @@ function actualizarResumenCategorias() {
         return;
     }
 
-    for (const categoria of categorias) {
+    categorias.forEach((categoria) => {
         const total = grupos[categoria];
 
         const tarjeta = document.createElement("div");
@@ -90,7 +123,7 @@ function actualizarResumenCategorias() {
 
         tarjeta.append(nombre, monto);
         resumenCategorias.appendChild(tarjeta);
-    }
+    });
 }
 
 function actualizarFilaVacia() {
@@ -116,6 +149,7 @@ function actualizarResumenes() {
     actualizarPanelBalance();
     actualizarResumenCategorias();
     actualizarFilaVacia();
+    guardarEnLocalStorage();
 }
 
 // ---------------------------------------------------------------
@@ -220,4 +254,5 @@ form.addEventListener("submit", (evento) => {
 // ---------------------------------------------------------------
 // Estado inicial
 // ---------------------------------------------------------------
+cargarDesdeLocalStorage();
 actualizarResumenes();
