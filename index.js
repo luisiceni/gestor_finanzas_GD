@@ -10,34 +10,8 @@ const elIngresos = document.getElementById("ingresos-totales");
 const elGastos = document.getElementById("gastos-totales");
 const elBalance = document.getElementById("balance-neto");
 
-
 // ---------------------------------------------------------------
-// LOCAL STORAGE
-// ---------------------------------------------------------------
-const CLAVE_STORAGE = "gestor_finanzas_historial";
-
-function guardarEnLocalStorage() {
-    localStorage.setItem(CLAVE_STORAGE, JSON.stringify(Transaccion.historial));
-}
-
-function cargarDesdeLocalStorage() {
-    const datosGuardados = localStorage.getItem(CLAVE_STORAGE);
-    if (!datosGuardados) return;
-
-    const transaccionesPlanas = JSON.parse(datosGuardados);
-    
-    // Limpiamos el array estático por seguridad antes de re-instanciar
-    Transaccion.historial = [];
-
-    for (let i = 0; i < transaccionesPlanas.length; i++) {
-        const t = transaccionesPlanas[i];
-        const nuevaTransaccion = new Transaccion(t.id, t.tipo, t.descripcion, t.monto, t.categoria);
-        agregarFilaAlHistorial(nuevaTransaccion);
-    }
-}
-
-// ---------------------------------------------------------------
-// Utilidades
+// Utilidades (Pesos Argentinos)
 // ---------------------------------------------------------------
 function formatearMoneda(valor) {
     return valor.toLocaleString("es-AR", {
@@ -45,8 +19,9 @@ function formatearMoneda(valor) {
         currency: "ARS"
     });
 }
+
 // ---------------------------------------------------------------
-// CÁLCULOS (trabajan sobre el array estático Transaccion.historial)
+// CÁLCULOS
 // ---------------------------------------------------------------
 function calcularTotales() {
     let ingresos = 0;
@@ -65,7 +40,6 @@ function calcularTotales() {
 }
 
 function agruparPorCategoria() {
-    // Devuelve { Comida: -150.5, Sueldo: 1200, ... } (ingresos suman, gastos restan)
     const grupos = {};
 
     Transaccion.historial.forEach((t) => {
@@ -144,12 +118,11 @@ function actualizarFilaVacia() {
     }
 }
 
-// Función única que se llama cada vez que se agrega o elimina un registro
+// Función central para actualizar la interfaz gráfica
 function actualizarResumenes() {
     actualizarPanelBalance();
     actualizarResumenCategorias();
     actualizarFilaVacia();
-    guardarEnLocalStorage();
 }
 
 // ---------------------------------------------------------------
@@ -185,9 +158,7 @@ function agregarFilaAlHistorial(transaccion) {
     const badgeTipo = document.createElement("span");
     badgeTipo.className =
         "text-xs px-2 py-0.5 rounded font-semibold " +
-        (esIngreso
-            ? "bg-emerald-100 text-emerald-800"
-            : "bg-rose-100 text-rose-800");
+        (esIngreso ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800");
     badgeTipo.textContent = esIngreso ? "Ingreso" : "Gasto";
     tdTipo.appendChild(badgeTipo);
 
@@ -196,8 +167,7 @@ function agregarFilaAlHistorial(transaccion) {
         "py-3.5 px-4 text-right font-semibold " +
         (esIngreso ? "text-emerald-600" : "text-rose-600")
     );
-    tdMonto.textContent =
-        (esIngreso ? "+" : "-") + formatearMoneda(transaccion.monto);
+    tdMonto.textContent = (esIngreso ? "+" : "-") + formatearMoneda(transaccion.monto);
 
     // Botón eliminar
     const tdAcciones = crearCelda("py-3.5 px-4 text-center");
@@ -213,18 +183,25 @@ function agregarFilaAlHistorial(transaccion) {
     listaTransacciones.appendChild(tr);
 }
 
+// Renderiza todas las transacciones que ya vinieron cargadas del LocalStorage
+function renderizarHistorialCompleto() {
+    listaTransacciones.replaceChildren();
+    Transaccion.historial.forEach((t) => {
+        agregarFilaAlHistorial(t);
+    });
+}
+
 // ---------------------------------------------------------------
 // ELIMINACIÓN
 // ---------------------------------------------------------------
 function eliminarTransaccion(id) {
-    // 1) Sacar el objeto del array estático
-    Transaccion.historial = Transaccion.historial.filter((t) => t.id !== id);
+    // Llamamos al método estático que elimina del array y actualiza el localStorage
+    Transaccion.eliminar(id);
 
-    // 2) Sacar la fila del DOM
+    // Sacamos la fila del DOM
     const fila = listaTransacciones.querySelector(`tr[data-id="${id}"]`);
     if (fila) fila.remove();
 
-    // 3) Recalcular balance y resumen por categorías
     actualizarResumenes();
 }
 
@@ -242,8 +219,9 @@ form.addEventListener("submit", (evento) => {
 
     if (!descripcion || !(monto > 0) || !tipo || !categoria) return;
 
-    const id = Date.now(); // identificador único suficiente para esta app
-    const nueva = new Transaccion(id, tipo, descripcion, monto, categoria);
+    const id = Date.now();
+
+    const nueva = Transaccion.crear({ id, tipo, descripcion, monto, categoria });
 
     agregarFilaAlHistorial(nueva);
     actualizarResumenes();
@@ -252,7 +230,7 @@ form.addEventListener("submit", (evento) => {
 });
 
 // ---------------------------------------------------------------
-// Estado inicial
+// INICIALIZACIÓN DE LA APLICACIÓN
 // ---------------------------------------------------------------
-cargarDesdeLocalStorage();
+renderizarHistorialCompleto();
 actualizarResumenes();
