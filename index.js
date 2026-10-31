@@ -61,8 +61,8 @@ function actualizarPanelBalance() {
     elBalance.textContent = formatearMoneda(balance);
 
     // El balance se pone rojo si es negativo
-    elBalance.classList.toggle("text-rose-600", balance < 0);
-    elBalance.classList.toggle("text-indigo-600", balance >= 0);
+    elBalance.classList.toggle("text-red-600", balance < 0);
+    elBalance.classList.toggle("text-emerald-600", balance >= 0);
 }
 
 function actualizarResumenCategorias() {
@@ -73,7 +73,7 @@ function actualizarResumenCategorias() {
 
     if (categorias.length === 0) {
         const vacio = document.createElement("p");
-        vacio.className = "col-span-full text-sm text-slate-500";
+        vacio.className = "col-span-full text-sm text-slate-950";
         vacio.textContent = "Todavía no hay movimientos.";
         resumenCategorias.appendChild(vacio);
         return;
@@ -83,16 +83,16 @@ function actualizarResumenCategorias() {
         const total = grupos[categoria];
 
         const tarjeta = document.createElement("div");
-        tarjeta.className = "bg-slate-50 p-3 rounded-lg border border-slate-200";
+        tarjeta.className = "bg-stone-100 p-3 rounded-lg border border-slate-200";
 
         const nombre = document.createElement("p");
-        nombre.className = "text-xs font-semibold text-slate-500 uppercase";
+        nombre.className = "text-xs font-semibold text-slate-950 uppercase";
         nombre.textContent = categoria;
 
         const monto = document.createElement("p");
         monto.className =
             "text-base font-bold mt-1 " +
-            (total < 0 ? "text-rose-600" : "text-emerald-600");
+            (total < 0 ? "text-red-600" : "text-emerald-600");
         monto.textContent = formatearMoneda(total);
 
         tarjeta.append(nombre, monto);
@@ -158,14 +158,14 @@ function agregarFilaAlHistorial(transaccion) {
     const badgeTipo = document.createElement("span");
     badgeTipo.className =
         "text-xs px-2 py-0.5 rounded font-semibold " +
-        (esIngreso ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800");
+        (esIngreso ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-600");
     badgeTipo.textContent = esIngreso ? "Ingreso" : "Gasto";
     tdTipo.appendChild(badgeTipo);
 
     // Monto
     const tdMonto = crearCelda(
         "py-3.5 px-4 text-right font-semibold " +
-        (esIngreso ? "text-emerald-600" : "text-rose-600")
+        (esIngreso ? "text-emerald-800" : "text-red-600")
     );
     tdMonto.textContent = (esIngreso ? "+" : "-") + formatearMoneda(transaccion.monto);
 
@@ -173,14 +173,15 @@ function agregarFilaAlHistorial(transaccion) {
     const tdAcciones = crearCelda("py-3.5 px-4 text-center");
     const btnEliminar = document.createElement("button");
     btnEliminar.type = "button";
-    btnEliminar.className = "text-rose-500 hover:text-rose-700 transition px-2 py-1";
+    btnEliminar.className = "text-red-500 hover:text-red-700 transition px-2 py-1";
     btnEliminar.title = "Eliminar";
     btnEliminar.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
     btnEliminar.addEventListener("click", () => eliminarTransaccion(transaccion.id));
     tdAcciones.appendChild(btnEliminar);
 
     tr.append(tdDescripcion, tdCategoria, tdTipo, tdMonto, tdAcciones);
-    listaTransacciones.appendChild(tr);
+    // prepend: la fila nueva va arriba (más recientes primero)
+    listaTransacciones.prepend(tr);
 }
 
 // Renderiza todas las transacciones que ya vinieron cargadas del LocalStorage
